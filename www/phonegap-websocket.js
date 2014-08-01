@@ -1,24 +1,10 @@
-var exec = require('cordova/exec');
+	
+  var cordova = require('cordova');
 
-function hasWebSocket() {
-  var m = /Android ([0-9]+)\.([0-9]+)/i.exec(navigator.userAgent);
-  var hasConstructor = typeof WebSocket === "function";
-
-  if (!m) { return hasConstructor; }
-
-  var x = parseInt(m[1], 10);
-  var y = parseInt(m[2], 10);
-
-  return hasConstructor && (x > 4 || (x === 4 && y >= 4));
-}
-
-hasWebSocket() || (function() {
-  
   var websocketId = 0;
+  
+  var JavaWebSocket = function (url, protocols, options) {
 
-  // Websocket constructor
-  var WebSocket = window.WebSocket = function(url, protocols, options) {
-      
     var socket = this;
     options || (options = {});
     options.headers || (options.headers = {});
@@ -34,7 +20,7 @@ hasWebSocket() || (function() {
     this.events = [];
     this.options = options;
     this.url = url;
-    this.readyState = WebSocket.CONNECTING;
+    this.readyState = JavaWebSocket.CONNECTING;
     this.socketId = "_cordova_websocket_" + websocketId;
     websocketId += 1;
     
@@ -47,13 +33,28 @@ hasWebSocket() || (function() {
       }, "WebSocket", "connect", [ this.socketId, url, options ]);
   };
 
-  WebSocket.prototype = {
+JavaWebSocket.hasWebSocket = function(){
+	console.log("haswebsocket()");
+  var m = /Android ([0-9]+)\.([0-9]+)/i.exec(navigator.userAgent);
+  var hasConstructor = typeof WebSocket === "function";
+
+  if (!m) { return hasConstructor; }
+
+  var x = parseInt(m[1], 10);
+  var y = parseInt(m[2], 10);
+
+  return hasConstructor && (x > 4 || (x === 4 && y >= 4));
+};
+
+
+//rewrite this
+  JavaWebSocket.prototype = {
     send: function (data) {
-      if (this.readyState == WebSocket.CLOSED ||
-          this.readyState == WebSocket.CLOSING) return;
+      if (this.readyState == JavaWebSocket.CLOSED ||
+          this.readyState == JavaWebSocket.CLOSING) return;
       
       if (data instanceof ArrayBuffer) {
-        data = arrayBufferToArray(data);
+        data = JavaWebSocket.arrayBufferToArray(data);
       } 
       else if (data instanceof Blob) {
         var reader = new FileReader();
@@ -65,15 +66,16 @@ hasWebSocket() || (function() {
         return;
       }
       
-      cordova.exec(noob, noob, "WebSocket", "send", [ this.socketId, data ]);
+      cordova.exec(JavaWebSocket.noob, JavaWebSocket.noob, "WebSocket", "send", [ this.socketId, data ]);
     },
+  
 
     close: function () {
-      if (this.readyState == WebSocket.CLOSED ||
-        this.readyState == WebSocket.CLOSING) return;
+      if (this.readyState == JavaWebSocket.CLOSED ||
+        this.readyState == JavaWebSocket.CLOSING) return;
 
-      this.readyState = WebSocket.CLOSING;
-      cordova.exec(noob, noob, "WebSocket", "close", [ this.socketId ]);
+      this.readyState = JavaWebSocket.CLOSING;
+      cordova.exec(JavaWebSocket.noob, JavaWebSocket.noob, "WebSocket", "close", [ this.socketId ]);
     },
 
     addEventListener: function (type, listener, useCapture) {
@@ -112,14 +114,14 @@ hasWebSocket() || (function() {
       this.readyState = event.readyState;
 
       if (event.type == "message") {
-        event = createMessageEvent("message", event.data);
+        event = JavaWebSocket.createMessageEvent("message", event.data);
       } 
       else if (event.type == "messageBinary") {
-        var result = arrayToBinaryType(event.data, this.binaryType);
-        event = createBinaryMessageEvent("message", result);
+        var result = JavaWebSocket.arrayToBinaryType(event.data, this.binaryType);
+        event = JavaWebSocket.createBinaryMessageEvent("message", result);
       } 
       else {
-        event = createSimpleEvent(event.type);
+        event = JavaWebSocket.createSimpleEvent(event.type);
       }
       
       this.dispatchEvent(event);
@@ -127,34 +129,35 @@ hasWebSocket() || (function() {
       if (event.readyState == WebSocket.CLOSING || 
           event.readyState == WebSocket.CLOSED) {
         // cleanup socket from internal map
-        cordova.exec(noob, noob, "WebSocket", "close", [ this.socketId ]);
+        cordova.exec(JavaWebSocket.noob, JavaWebSocket.noob, "WebSocket", "close", [ this.socketId ]);
       }
     }
   };
 
-  WebSocket.prototype.CONNECTING = WebSocket.CONNECTING = 0;
-  WebSocket.prototype.OPEN = WebSocket.OPEN = 1;
-  WebSocket.prototype.CLOSING = WebSocket.CLOSING = 2;
-  WebSocket.prototype.CLOSED = WebSocket.CLOSED = 3;
+
+  JavaWebSocket.prototype.CONNECTING = WebSocket.CONNECTING = 0;
+  JavaWebSocket.prototype.OPEN = WebSocket.OPEN = 1;
+  JavaWebSocket.prototype.CLOSING = WebSocket.CLOSING = 2;
+  JavaWebSocket.prototype.CLOSED = WebSocket.CLOSED = 3;
 
 
   // helpers
 
-  function noob () {}
+  JavaWebSocket.noob = function() {}
 
-  function createSimpleEvent(type) {
+  JavaWebSocket.createSimpleEvent = function(type) {
     var event = document.createEvent("Event");
     event.initEvent(type, false, false);
     return event;
   }
 
-  function createMessageEvent(type, data) {
+  JavaWebSocket.createMessageEvent = function(type, data) {
     var event = document.createEvent("MessageEvent");
     event.initMessageEvent("message", false, false, data, null, null, window, null);
     return event;
   }
     
-  function createBinaryMessageEvent(type, data) {
+  JavaWebSocket.createBinaryMessageEvent = function(type, data) {
     // This does not match the WebSocket spec. The Event is suppose to be a
     // MessageEvent. But in Android WebView, MessageEvent.initMessageEvent() 
     // makes a mess of ArrayBuffers.  This should work with most clients, as
@@ -167,7 +170,7 @@ hasWebSocket() || (function() {
     return event;
   }
 
-  function arrayBufferToArray(arrayBuffer) {
+  JavaWebSocket.arrayBufferToArray = function(arrayBuffer) {
     var output = [];
     var utf8arr = new Uint8Array(arrayBuffer);
     
@@ -178,7 +181,7 @@ hasWebSocket() || (function() {
     return output;
   }
     
-  function arrayToBinaryType(array, binaryType) {   
+  JavaWebSocket.arrayToBinaryType = function(array, binaryType) {   
     var result = null;
 
     if (!array || !array.length) return result;
@@ -218,9 +221,6 @@ hasWebSocket() || (function() {
     throw "Blob not supported on this platform";
   }
 
-}());
 
-if (typeof module != 'undefined' && module.exports) {
-  module.exports = window.WebSocket;
-}
-
+//Register the plugin
+module.exports = JavaWebSocket;
