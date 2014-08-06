@@ -2,7 +2,7 @@
 
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
       id="com.ququplay.websocket.WebSocket"
-      version="0.1.0">
+      version="0.1.1">
 
     <name>WebSocket</name>
     
@@ -23,7 +23,7 @@
     <!-- android -->
     <platform name="android">
        <js-module src="www/phonegap-websocket.js" name="websocket">
-          <clobbers target="WebSocket" />
+          <clobbers target="cordova.plugins.JavaWebSocket" />
        </js-module>
 
         <config-file target="res/xml/config.xml" parent="/*">
