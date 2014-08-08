@@ -126,8 +126,8 @@ JavaWebSocket.hasWebSocket = function(){
       
       this.dispatchEvent(event);
       
-      if (event.readyState == WebSocket.CLOSING || 
-          event.readyState == WebSocket.CLOSED) {
+      if (event.readyState == JavaWebSocket.CLOSING || 
+          event.readyState == JavaWebSocket.CLOSED) {
         // cleanup socket from internal map
         cordova.exec(JavaWebSocket.noob, JavaWebSocket.noob, "WebSocket", "close", [ this.socketId ]);
       }
@@ -135,10 +135,10 @@ JavaWebSocket.hasWebSocket = function(){
   };
 
 
-  JavaWebSocket.prototype.CONNECTING = WebSocket.CONNECTING = 0;
-  JavaWebSocket.prototype.OPEN = WebSocket.OPEN = 1;
-  JavaWebSocket.prototype.CLOSING = WebSocket.CLOSING = 2;
-  JavaWebSocket.prototype.CLOSED = WebSocket.CLOSED = 3;
+  JavaWebSocket.prototype.CONNECTING = JavaWebSocket.CONNECTING = 0;
+  JavaWebSocket.prototype.OPEN = JavaWebSocket.OPEN = 1;
+  JavaWebSocket.prototype.CLOSING = JavaWebSocket.CLOSING = 2;
+  JavaWebSocket.prototype.CLOSED = JavaWebSocket.CLOSED = 3;
 
 
   // helpers
