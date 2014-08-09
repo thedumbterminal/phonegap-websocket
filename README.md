@@ -34,6 +34,20 @@ You can find demo based on this plugin and socket.io here:
 
 [https://bitbucket.org/mkuklis/phonegap-websocket-demo](https://bitbucket.org/mkuklis/phonegap-websocket-demo)
 
+### Example
+
+Using coffeescript
+````
+	unless window.WebSocket
+		console.log "Native websocket not available"
+		if cordova?.plugins?.JavaWebSocket
+			console.log "Using plugin alternative"
+			window.WebSocket = cordova.plugins.JavaWebSocket
+		else
+			throw "Websockets not supported"
+	new WebSocket 'wss://secureserver.com/path'
+````
+
 ## Note
 
 If you plan to test it locally from your emulator please make sure to use `10.0.2.2` ip address when connecting to your local server.
